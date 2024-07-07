@@ -1,7 +1,8 @@
 import { Router } from "express";
+import todoRouter from "./todo/todo.router";
 
-export const todoRouter = Router();
+const router = Router();
 
-todoRouter.get("/todo/app", (req, res) => {
-    res.send("I am a Todo App");
-});
+router.use("/todo", todoRouter);
+
+export default router;

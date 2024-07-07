@@ -1,12 +1,14 @@
 import express from "express";
 import cors from "cors";
+import bodyParser from "body-parser";
 
-import type { TCustomString } from "#src/types/demo";
-
-import { todoRouter } from "#src/routes/router";
+import appRouter from "#src/routes/router";
 
 const app = express();
+
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const port = process.env.PORT || 3000;
 
@@ -14,16 +16,7 @@ app.get("/", (req, res) => {
     res.send("Hello, World!");
 });
 
-function getString(arg: TCustomString) {
-    return `arg is ${arg}`;
-}
-
-app.get("/hello", (req, res) => {
-    const str = getString("some");
-    res.send(str);
-});
-
-app.use(todoRouter);
+app.use(appRouter);
 
 app.listen(port, () => {
     console.info(`Server running at http://localhost:${port}`);
