@@ -3,7 +3,7 @@
     "module": "app.ts",
     "type": "module",
     "scripts": {
-        "dev": "bun --hot app.ts",
+        "dev": "bun --hot ./src/app.ts",
         "build": "bunx tsc",
         "lint": "prettier --check . && eslint .",
         "format": "prettier --write .",

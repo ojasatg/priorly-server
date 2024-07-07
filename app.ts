@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
 
-import type { TCustomString } from "./src/types/demo";
+import type { TCustomString } from "#src/types/demo";
 
-import { todoRouter } from "./src/routes/router";
+import { todoRouter } from "#src/routes/router";
 
 const app = express();
 app.use(cors());
