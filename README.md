@@ -1,6 +1,6 @@
-## Priorly Server
+## Express Bun Server Template
 
-### Adding prettier options
+1. bun install
+2. bun run dev
 
-"plugins": ["prettier-plugin-svelte", "prettier-plugin-tailwindcss"],
-"overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }]
+Check package.json for scripts.
