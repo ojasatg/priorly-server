@@ -1,0 +1,20 @@
+{
+    "name": "priorly-server",
+    "module": "app.ts",
+    "type": "module",
+    "scripts": {
+        "lint": "prettier --check . && eslint .",
+        "format": "prettier --write ."
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@types/eslint": "^8.56.10",
+        "eslint": "^9.6.0",
+        "eslint-config-prettier": "^9.1.0",
+        "prettier": "^3.3.2",
+        "typescript-eslint": "^7.15.0"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    }
+}
