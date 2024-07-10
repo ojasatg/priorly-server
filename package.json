@@ -1,31 +1,33 @@
 {
-  "name": "priorly-server",
-  "module": "app.ts",
-  "type": "module",
-  "scripts": {
-    "dev": "bun --hot app.ts",
-    "build": "bunx tsc",
-    "lint": "prettier --check . && eslint .",
-    "format": "prettier --write .",
-    "clean": "rm -rf dist && rm -rf node_modules"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/cors": "^2.8.17",
-    "@types/eslint": "^8.56.10",
-    "@types/express": "^4.17.21",
-    "eslint": "^9.6.0",
-    "eslint-config-prettier": "^9.1.0",
-    "nodemon": "^3.1.4",
-    "prettier": "^3.3.2",
-    "typescript-eslint": "^7.15.0"
-  },
-  "peerDependencies": {
-    "typescript": "^5.5.3"
-  },
-  "dependencies": {
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "express": "^4.19.2"
-  }
+    "name": "priorly-server",
+    "module": "app.ts",
+    "type": "module",
+    "scripts": {
+        "dev": "bun --watch app.ts",
+        "build": "bunx tsc",
+        "lint": "prettier --check . && eslint .",
+        "format": "prettier --write .",
+        "clean": "rm -rf dist && rm -rf node_modules"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@types/cors": "^2.8.17",
+        "@types/eslint": "^8.56.10",
+        "@types/express": "^4.17.21",
+        "@types/lodash": "^4.17.6",
+        "eslint": "^9.6.0",
+        "eslint-config-prettier": "^9.1.0",
+        "nodemon": "^3.1.4",
+        "prettier": "^3.3.2",
+        "typescript-eslint": "^7.15.0"
+    },
+    "peerDependencies": {
+        "typescript": "^5.5.3"
+    },
+    "dependencies": {
+        "body-parser": "^1.20.2",
+        "cors": "^2.8.5",
+        "express": "^4.19.2",
+        "lodash": "^4.17.21"
+    }
 }

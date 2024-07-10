@@ -1,7 +1,6 @@
 export enum EServerResponseCodes {
     OK = 200,
     CREATED = 201,
-    UPDATED = 204, // OR DELETED
     ACCEPTED = 202,
 
     BAD_REQUEST = 400,

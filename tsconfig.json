@@ -1,8 +1,26 @@
 {
     "compilerOptions": {
         "paths": {
-            "#src": ["./src"],
-            "#src/*": ["./src/*"]
+            "#controllers": ["./src/controllers"],
+            "#controllers/*": ["./src/controllers/*"],
+
+            "#middlewares": ["./src/middlewares"],
+            "#middlewares/*": ["./src/middlewares/*"],
+
+            "#models": ["./src/models"],
+            "#models/*": ["./src/models/*"],
+
+            "#routes": ["./src/routes"],
+            "#routes/*": ["./src/routes/*"],
+
+            "#schemas": ["./src/schemas"],
+            "#schemas/*": ["./src/schemas/*"],
+
+            "#types": ["./src/types"],
+            "#types/*": ["./src/types/*"],
+
+            "#utils": ["./src/utils"],
+            "#utils/*": ["./src/utils/*"]
         },
 
         // Enable latest features
