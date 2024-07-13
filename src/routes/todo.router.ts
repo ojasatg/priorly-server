@@ -4,10 +4,10 @@ import TodoController from "#controllers/todo.controller";
 
 const router = Router();
 
-router.post("/create", TodoController.createTodo);
-
-router.get("/all", TodoController.allTodos);
-
-router.post("/delete", TodoController.deleteTodo);
+router.get("/all", TodoController.all);
+router.post("/create", TodoController.create);
+router.delete("/remove", TodoController.remove);
+router.get("/details", TodoController.details);
+router.put("/edit", TodoController.edit);
 
 export default router;
