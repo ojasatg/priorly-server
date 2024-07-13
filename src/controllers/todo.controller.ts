@@ -25,6 +25,7 @@ const TODOS = [
         createdOn: getCurrentTimeStamp(),
         updatedOn: getCurrentTimeStamp(),
         completedOn: getCurrentTimeStamp() + 20000000,
+        isPinned: false,
     },
     {
         id: "xyz",
@@ -35,6 +36,7 @@ const TODOS = [
         updatedOn: getCurrentTimeStamp(),
         deadline: getCurrentTimeStamp(),
         reminder: getCurrentTimeStamp(),
+        isPinned: false,
     },
     {
         id: "qwe",
@@ -43,6 +45,7 @@ const TODOS = [
         isDone: false,
         createdOn: getCurrentTimeStamp(),
         updatedOn: getCurrentTimeStamp(),
+        isPinned: false,
     },
 ];
 
@@ -71,6 +74,7 @@ async function create(req: Request, res: Response) {
         updatedOn: getCurrentTimeStamp(),
         deadline: getCurrentTimeStamp() + 10000000,
         reminder: getCurrentTimeStamp(),
+        isPinned: false,
     };
     TODOS.unshift(newTodo);
 
