@@ -40,11 +40,11 @@ const TODOS = [
     },
     {
         id: "qwe",
-        title: "Buy groceries",
-        description: "Pick up vegetables and fruits from the market",
+        title: "Go shopping",
+        description: "Buy shoes and clothes",
         isDone: false,
-        createdOn: getCurrentTimeStamp(),
-        updatedOn: getCurrentTimeStamp(),
+        createdOn: getCurrentTimeStamp() + 456789067,
+        updatedOn: getCurrentTimeStamp() + 456789067,
         isPinned: false,
     },
 ];
@@ -64,17 +64,13 @@ async function all(req: Request, res: Response) {
 async function create(req: Request, res: Response) {
     logURL(req);
     await useSleep(2000);
+
+    const reqTodo = req.body;
     const newTodo = {
+        ...reqTodo,
         id: "new",
-        title: "A brand new todo",
-        description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eleifend sed turpis a fringilla. Etiam nec felis in dolor lobortis accumsan. Mauris convallis bibendum purus vel interdum.",
-        isDone: false,
-        createdOn: getCurrentTimeStamp() - 9999999,
+        createdOn: getCurrentTimeStamp(),
         updatedOn: getCurrentTimeStamp(),
-        deadline: getCurrentTimeStamp() + 10000000,
-        reminder: getCurrentTimeStamp(),
-        isPinned: false,
     };
     TODOS.unshift(newTodo);
 
@@ -126,8 +122,16 @@ async function edit(req: Request, res: Response) {
         return;
     }
 
+    console.log(req.body);
+
     const todoToBeChanged = TODOS[index];
     const changedTodo = { ...todoToBeChanged, ...changes, updatedOn: getCurrentTimeStamp() };
+
+    if (!changedTodo.isDone && !!changedTodo.completedOn) {
+        delete changedTodo.completedOn;
+        changedTodo.isPinned = false;
+    }
+
     TODOS.splice(index, 1, changedTodo);
 
     res.status(200).json({
