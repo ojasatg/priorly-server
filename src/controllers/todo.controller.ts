@@ -122,8 +122,6 @@ async function edit(req: Request, res: Response) {
         return;
     }
 
-    console.log(req.body);
-
     const todoToBeChanged = TODOS[index];
     const changedTodo = { ...todoToBeChanged, ...changes, updatedOn: getCurrentTimeStamp() };
 
