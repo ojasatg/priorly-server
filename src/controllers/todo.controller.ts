@@ -6,45 +6,136 @@ import _ from "lodash";
 
 const TODOS = [
     {
-        id: "abc",
-        title: "Complete assignment and do something",
+        id: "1a2b3c4d",
+        title: "Prepare research proposal",
         description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eleifend sed turpis a fringilla. Etiam nec felis in dolor lobortis accumsan. Mauris convallis bibendum purus vel interdum. Cras finibus ligula et volutpat consectetur. Sed eros nunc, lacinia rutrum ornare vel, efficitur at sem. Integer id.",
+            "Draft proposal outlining research objectives, methodology, and expected outcomes.",
         isDone: false,
-        createdOn: getCurrentTimeStamp() - 9999999,
-        updatedOn: getCurrentTimeStamp(),
-        deadline: getCurrentTimeStamp() + 10000000,
-        reminder: getCurrentTimeStamp(),
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        deadline: 1648828800,
+        reminder: 1648776000,
         isPinned: true,
     },
     {
-        id: "pqr",
-        title: "Buy groceries",
-        description: "Pick up vegetables and fruits from the market",
+        id: "5f6g7h8i",
+        title: "Review code for performance improvements",
+        isDone: false,
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        deadline: 1858915200,
+        reminder: 1648828800,
+        isPinned: false,
+    },
+    {
+        id: "9j0k1l2m",
+        title: "Attend project kickoff meeting",
+        isDone: false,
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        deadline: 1858996800,
+        reminder: 1648915200,
+        isPinned: true,
+    },
+    {
+        id: "3h4i5j6k",
+        title: "Update project documentation",
+        description:
+            "Ensure all project documentation is up to date with recent changes and additions.",
+        isDone: false,
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        deadline: 1649083200,
+        reminder: 1648996800,
+        isPinned: false,
+    },
+    {
+        id: "7l8m9n0o",
+        title: "Organize team retrospective",
+        isDone: false,
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        deadline: 1649164800,
+        reminder: 1649083200,
+        isPinned: false,
+    },
+    {
+        id: "1p2q3r4s",
+        title: "Research new software tools",
+        description:
+            "Explore and evaluate potential new software tools to streamline project workflows and enhance productivity.",
+        isDone: false,
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        deadline: 1649246400,
+        reminder: 1649164800,
+        isPinned: false,
+    },
+    {
+        id: "5t6u7v8w",
+        title: "Conduct user testing sessions",
+        description:
+            "Schedule and conduct user testing sessions to gather feedback on product usability.",
+        isDone: false,
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        deadline: 1649328000,
+        reminder: 1649246400,
+        isPinned: true,
+    },
+    {
+        id: "9x0y1z2a",
+        title: "Write unit tests for new features",
+        description:
+            "Develop unit tests to ensure the stability and functionality of newly implemented features.",
+        isDone: false,
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        deadline: 1649414400,
+        reminder: 1649328000,
+        isPinned: false,
+    },
+    {
+        id: "3b4c5d6e",
+        title: "Prepare presentation for client demo",
+        description:
+            "Create a compelling presentation to showcase project progress and upcoming milestones to the client.",
+        isDone: false,
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        deadline: 1649500800,
+        reminder: 1649414400,
+        isPinned: false,
+    },
+    {
+        id: "7f8g9h0i",
+        title: "Deploy latest version to staging server",
+        description:
+            "Push latest changes to staging environment for final testing before production deployment.",
         isDone: true,
-        createdOn: getCurrentTimeStamp(),
-        updatedOn: getCurrentTimeStamp(),
-        completedOn: getCurrentTimeStamp() + 20000000,
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        completedOn: 1649328000,
         isPinned: false,
     },
     {
-        id: "xyz",
-        title: "Call client",
-        description: "Discuss the new project requirements",
-        isDone: false,
-        createdOn: getCurrentTimeStamp(),
-        updatedOn: getCurrentTimeStamp(),
-        deadline: getCurrentTimeStamp(),
-        reminder: getCurrentTimeStamp(),
+        id: "1j2k3l4m",
+        title: "Finalize budget report for Q3",
+        isDone: true,
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        completedOn: 1649414400,
         isPinned: false,
     },
     {
-        id: "qwe",
-        title: "Go shopping",
-        description: "Buy shoes and clothes",
-        isDone: false,
-        createdOn: getCurrentTimeStamp() + 456789067,
-        updatedOn: getCurrentTimeStamp() + 456789067,
+        id: "5n6o7p8q",
+        title: "Conduct performance reviews with team members",
+        description:
+            "Schedule and conduct individual performance reviews with each team member to provide feedback and set goals.",
+        isDone: true,
+        createdOn: 1648656000,
+        updatedOn: 1648657200,
+        completedOn: 1649500800,
         isPinned: false,
     },
 ];
@@ -69,6 +160,7 @@ async function create(req: Request, res: Response) {
     const newTodo = {
         ...reqTodo,
         id: "new",
+        isDone: false,
         createdOn: getCurrentTimeStamp(),
         updatedOn: getCurrentTimeStamp(),
     };
@@ -125,8 +217,19 @@ async function edit(req: Request, res: Response) {
     const todoToBeChanged = TODOS[index];
     const changedTodo = { ...todoToBeChanged, ...changes, updatedOn: getCurrentTimeStamp() };
 
-    if (!changedTodo.isDone && !!changedTodo.completedOn) {
-        delete changedTodo.completedOn;
+    if (changedTodo.isDone) {
+        // if todo is updated as done, we remove the reminder and deadline keys
+        if (changedTodo.reminder) {
+            delete changedTodo.reminder;
+        }
+        if (changedTodo.deadline) {
+            delete changedTodo.deadline;
+        }
+    } else if (!changedTodo.isDone) {
+        // if todo is updated as not done and has completedOn key, we delete it.
+        if (changedTodo.completedOn) {
+            delete changedTodo.completedOn;
+        }
         changedTodo.isPinned = false;
     }
 
