@@ -1,10 +1,12 @@
 import type { Request, Response } from "express";
+import _ from "lodash";
 import { getCurrentTimeStamp, useSleep } from "#utils/datetime.utils";
 import { EServerResponseRescodes } from "#types/api.types";
+import { ETodoBulkOperation } from "#constants";
 import { logURL } from "#utils/logger.utils";
-import _ from "lodash";
+import { bulkTodoOperation } from "../helpers/todo.helper";
 
-const TODOS = [
+let TODOS = [
     {
         id: "1a2b3c4d",
         title: "Prepare research proposal",
@@ -269,12 +271,42 @@ async function remove(req: Request, res: Response) {
     });
 }
 
+async function bulk(req: Request, res: Response) {
+    logURL(req);
+    await useSleep(2000);
+    // always returns success with success and error operations
+
+    const bulkOp = req.body.operation;
+
+    if (!_.includes(_.values(ETodoBulkOperation), bulkOp)) {
+        res.status(400).json({
+            error: "Invalid operation",
+            message: "Requested operation could not be completed",
+        });
+    }
+
+    const bulkIds = req.body.ids;
+
+    const { successData, errorData, todos } = bulkTodoOperation(bulkIds, TODOS, bulkOp);
+    TODOS = todos;
+
+    res.status(200).json({
+        rescode: EServerResponseRescodes.SUCCESS,
+        message: "Operation completed successfully",
+        data: {
+            success: successData,
+            error: errorData,
+        },
+    });
+}
+
 const TodoController = {
     all,
     create,
     remove,
     details,
     edit,
+    bulk,
 };
 
 export default TodoController;

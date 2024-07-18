@@ -9,5 +9,6 @@ router.post("/create", TodoController.create);
 router.get("/details", TodoController.details);
 router.put("/edit", TodoController.edit);
 router.delete("/remove", TodoController.remove);
+router.delete("/bulk/", TodoController.bulk);
 
 export default router;
