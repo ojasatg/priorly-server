@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import _ from "lodash";
-import { getCurrentTimeStamp, useSleep } from "#utils/datetime.utils";
+import { getCurrentTimeStamp } from "#utils/datetime.utils";
 import { EServerResponseRescodes } from "#types/api.types";
 import { ETodoBulkOperation } from "#constants";
 import { logURL } from "#utils/logger.utils";
@@ -144,7 +144,7 @@ let TODOS = [
 
 async function all(req: Request, res: Response) {
     logURL(req);
-    await useSleep(2000);
+    2000;
     res.status(200).json({
         rescode: EServerResponseRescodes.SUCCESS,
         message: "Todos fetched successfully",
@@ -156,7 +156,7 @@ async function all(req: Request, res: Response) {
 
 async function create(req: Request, res: Response) {
     logURL(req);
-    await useSleep(2000);
+    2000;
 
     const reqTodo = req.body;
     const newTodo = {
@@ -178,7 +178,7 @@ async function create(req: Request, res: Response) {
 }
 
 async function details(req: Request, res: Response) {
-    await useSleep(2000);
+    2000;
     const todoId = req.query.id;
     const responseTodo = _.find(TODOS, { id: todoId });
 
@@ -201,7 +201,7 @@ async function details(req: Request, res: Response) {
 }
 
 async function edit(req: Request, res: Response) {
-    await useSleep(2000);
+    2000;
     const todoId = req.query.id as string; // taking id in query
     const changes = req.body.changes; // taking id in body, will require some extra work of processing the request.
 
@@ -250,7 +250,7 @@ async function remove(req: Request, res: Response) {
     logURL(req);
     const todoId = req.query.id as string;
 
-    await useSleep(2000);
+    2000;
 
     const todoToDelete = _.find(TODOS, { id: todoId });
     if (_.isEmpty(todoToDelete)) {
@@ -273,7 +273,7 @@ async function remove(req: Request, res: Response) {
 
 async function bulk(req: Request, res: Response) {
     logURL(req);
-    await useSleep(2000);
+    2000;
     // always returns success with success and error operations
 
     const bulkOp = req.body.operation;
