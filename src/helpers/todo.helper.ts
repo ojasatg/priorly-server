@@ -73,114 +73,6 @@ function bulkToggle(todoIds: string[], todos: any[], operation: ETodoBulkOperati
     return { todos, successData, errorData };
 }
 
-// function bulkPin(todoIds: string[], todos: any[]) {
-//     const errorData: TTodoBulkOperationResponseItem[] = [];
-//     const successData: TTodoBulkOperationResponseItem[] = [];
-
-//     _.forEach(todoIds, (todoId) => {
-//         const found = _.findIndex(todos, { id: todoId });
-//         if (found !== -1) {
-//             todos[found].isPinned = true;
-//             successData.push({
-//                 id: todoId,
-//                 message: "Item pinned successfully",
-//             });
-//         } else {
-//             errorData.push({
-//                 id: todoId,
-//                 message: "Item does not exist",
-//             });
-//         }
-//     });
-
-//     return {
-//         successData,
-//         errorData,
-//         todos,
-//     };
-// }
-
-// function bulkUnpin(todoIds: string[], todos: any[]) {
-//     const errorData: TTodoBulkOperationResponseItem[] = [];
-//     const successData: TTodoBulkOperationResponseItem[] = [];
-
-//     _.forEach(todoIds, (todoId) => {
-//         const found = _.findIndex(todos, { id: todoId });
-//         if (found !== -1) {
-//             todos[found].isPinned = false;
-//             successData.push({
-//                 id: todoId,
-//                 message: "Item pinned successfully",
-//             });
-//         } else {
-//             errorData.push({
-//                 id: todoId,
-//                 message: "Item does not exist",
-//             });
-//         }
-//     });
-
-//     return {
-//         successData,
-//         errorData,
-//         todos,
-//     };
-// }
-
-// function bulkDone(todoIds: string[], todos: any[]) {
-//     const errorData: TTodoBulkOperationResponseItem[] = [];
-//     const successData: TTodoBulkOperationResponseItem[] = [];
-
-//     _.forEach(todoIds, (todoId) => {
-//         const found = _.findIndex(todos, { id: todoId });
-//         if (found !== -1) {
-//             todos[found].isDone = true;
-//             successData.push({
-//                 id: todoId,
-//                 message: "Item marked as done successfully",
-//             });
-//         } else {
-//             errorData.push({
-//                 id: todoId,
-//                 message: "Item does not exist",
-//             });
-//         }
-//     });
-
-//     return {
-//         successData,
-//         errorData,
-//         todos,
-//     };
-// }
-
-// function bulkUndo(todoIds: string[], todos: any[]) {
-//     const errorData: TTodoBulkOperationResponseItem[] = [];
-//     const successData: TTodoBulkOperationResponseItem[] = [];
-
-//     _.forEach(todoIds, (todoId) => {
-//         const found = _.findIndex(todos, { id: todoId });
-//         if (found !== -1) {
-//             todos[found].isDone = false;
-//             successData.push({
-//                 id: todoId,
-//                 message: "Item marked as not done successfully",
-//             });
-//         } else {
-//             errorData.push({
-//                 id: todoId,
-//                 message: "Item does not exist",
-//             });
-//         }
-//     });
-
-//     return {
-//         successData,
-//         errorData,
-//         todos,
-//     };
-// }
-
 export function bulkTodoOperation(todoIds: string[], todos: any[], operation: ETodoBulkOperation) {
     let successData: TTodoBulkOperationResponseItem[] = [];
     let errorData: TTodoBulkOperationResponseItem[] = [];
@@ -199,4 +91,9 @@ export function bulkTodoOperation(todoIds: string[], todos: any[], operation: ET
     todos = operationResult?.todos ?? [];
 
     return { successData, errorData, todos };
+}
+
+export function filterTodos(todos: any[], filters: { isDone: boolean; isPinned: boolean }) {
+    const result = _.filter(todos, filters);
+    return result;
 }

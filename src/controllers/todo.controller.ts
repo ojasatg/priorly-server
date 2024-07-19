@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import _ from "lodash";
-import { getCurrentTimeStamp } from "#utils/datetime.utils";
+import { getCurrentTimeStamp, useSleep } from "#utils/datetime.utils";
 import { EServerResponseRescodes } from "#types/api.types";
 import { ETodoBulkOperation } from "#constants";
 import { logURL } from "#utils/logger.utils";
@@ -144,12 +144,25 @@ let TODOS = [
 
 async function all(req: Request, res: Response) {
     logURL(req);
-    2000;
+    const filters = req.query;
+    let resTodos = TODOS;
+
+    const _filters = {
+        isDone: filters.isDone === "true",
+        isPinned: filters.isPinned === "true",
+    };
+
+    if (!_.isEmpty(filters)) {
+        resTodos = _.filter(TODOS, _filters) as typeof TODOS;
+    }
+
+    await useSleep(2000);
+
     res.status(200).json({
         rescode: EServerResponseRescodes.SUCCESS,
         message: "Todos fetched successfully",
         data: {
-            todos: TODOS,
+            todos: resTodos,
         },
     });
 }
