@@ -240,12 +240,13 @@ async function edit(req: Request, res: Response) {
         if (changedTodo.deadline) {
             delete changedTodo.deadline;
         }
+
+        changedTodo.completedOn = getCurrentTimeStamp();
     } else if (!changedTodo.isDone) {
         // if todo is updated as not done and has completedOn key, we delete it.
         if (changedTodo.completedOn) {
             delete changedTodo.completedOn;
         }
-        changedTodo.isPinned = false;
     }
 
     TODOS.splice(index, 1, changedTodo);
@@ -262,8 +263,6 @@ async function edit(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
     logURL(req);
     const todoId = req.query.id as string;
-
-    2000;
 
     const todoToDelete = _.find(TODOS, { id: todoId });
     if (_.isEmpty(todoToDelete)) {

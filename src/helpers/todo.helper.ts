@@ -1,6 +1,7 @@
 import _ from "lodash";
 import type { TTodoBulkOperationResponseItem } from "#types";
 import { ETodoBulkOperation } from "#constants";
+import { getCurrentTimeStamp } from "#utils/datetime.utils";
 
 const TODO_OPERATION_MESSAGES = {
     [ETodoBulkOperation.PIN]: "Item pinned successfully",
@@ -58,6 +59,18 @@ function bulkToggle(todoIds: string[], todos: any[], operation: ETodoBulkOperati
         const found = _.findIndex(todos, { id: todoId });
         if (found !== -1) {
             todos[found][fieldToBeOperated] = valueToBeSet;
+
+            const todo = todos[found];
+            if (todo.isDone && operation === ETodoBulkOperation.DONE) {
+                if (todo.reminder) {
+                    delete todo.reminder;
+                }
+                if (todo.deadline) {
+                    delete todo.deadline;
+                }
+                todo.completedOn = getCurrentTimeStamp();
+            }
+
             successData.push({
                 id: todoId,
                 message: TODO_OPERATION_MESSAGES[operation],
