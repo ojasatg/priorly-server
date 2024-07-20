@@ -18,6 +18,7 @@ let TODOS = [
         deadline: 1648828800,
         reminder: 1648776000,
         isPinned: true,
+        isDeleted: false,
     },
     {
         id: "5f6g7h8i",
@@ -28,6 +29,7 @@ let TODOS = [
         deadline: 1858915200,
         reminder: 1648828800,
         isPinned: false,
+        isDeleted: false,
     },
     {
         id: "9j0k1l2m",
@@ -38,6 +40,7 @@ let TODOS = [
         deadline: 1858996800,
         reminder: 1648915200,
         isPinned: true,
+        isDeleted: false,
     },
     {
         id: "3h4i5j6k",
@@ -50,6 +53,7 @@ let TODOS = [
         deadline: 1649083200,
         reminder: 1648996800,
         isPinned: false,
+        isDeleted: false,
     },
     {
         id: "7l8m9n0o",
@@ -60,6 +64,7 @@ let TODOS = [
         deadline: 1649164800,
         reminder: 1649083200,
         isPinned: false,
+        isDeleted: false,
     },
     {
         id: "1p2q3r4s",
@@ -72,6 +77,7 @@ let TODOS = [
         deadline: 1649246400,
         reminder: 1649164800,
         isPinned: false,
+        isDeleted: false,
     },
     {
         id: "5t6u7v8w",
@@ -84,6 +90,7 @@ let TODOS = [
         deadline: 1649328000,
         reminder: 1649246400,
         isPinned: true,
+        isDeleted: false,
     },
     {
         id: "9x0y1z2a",
@@ -96,6 +103,7 @@ let TODOS = [
         deadline: 1649414400,
         reminder: 1649328000,
         isPinned: false,
+        isDeleted: false,
     },
     {
         id: "3b4c5d6e",
@@ -108,6 +116,7 @@ let TODOS = [
         deadline: 1649500800,
         reminder: 1649414400,
         isPinned: false,
+        isDeleted: false,
     },
     {
         id: "7f8g9h0i",
@@ -119,6 +128,7 @@ let TODOS = [
         updatedOn: 1648657200,
         completedOn: 1649328000,
         isPinned: false,
+        isDeleted: false,
     },
     {
         id: "1j2k3l4m",
@@ -128,6 +138,7 @@ let TODOS = [
         updatedOn: 1648657200,
         completedOn: 1649414400,
         isPinned: false,
+        isDeleted: false,
     },
     {
         id: "5n6o7p8q",
@@ -139,22 +150,40 @@ let TODOS = [
         updatedOn: 1648657200,
         completedOn: 1649500800,
         isPinned: false,
+        isDeleted: false,
     },
 ];
 
 async function all(req: Request, res: Response) {
     logURL(req);
     const filters = req.query;
-    let resTodos = TODOS;
+    let resTodos = _.filter(TODOS, { isDeleted: false });
 
     const _filters = {
-        isDone: filters.isDone === "true",
-        isPinned: filters.isPinned === "true",
+        isDone: filters?.isDone === "true",
+        isPinned: filters?.isPinned === "true",
+        isDeleted: false,
     };
 
     if (!_.isEmpty(filters)) {
         resTodos = _.filter(TODOS, _filters) as typeof TODOS;
     }
+
+    await useSleep(2000);
+
+    res.status(200).json({
+        rescode: EServerResponseRescodes.SUCCESS,
+        message: "Todos fetched successfully",
+        data: {
+            todos: resTodos,
+        },
+    });
+}
+
+async function allDeleted(req: Request, res: Response) {
+    logURL(req);
+
+    const resTodos = _.filter(TODOS, { isDeleted: true }) as typeof TODOS;
 
     await useSleep(2000);
 
@@ -319,6 +348,7 @@ const TodoController = {
     details,
     edit,
     bulk,
+    allDeleted,
 };
 
 export default TodoController;
