@@ -204,7 +204,7 @@ async function create(req: Request, res: Response) {
         const reqTodo = req.body;
         const createdTodo = await TodoModel.create(reqTodo);
 
-        const todo = TodoSchema.parse(createdTodo);
+        const todo = TodoSchema.parse(createdTodo); // strips unnecessary keys
 
         res.status(201).json({
             rescode: EServerResponseRescodes.SUCCESS,
@@ -326,7 +326,6 @@ async function remove(req: Request, res: Response) {
 
 async function bulk(req: Request, res: Response) {
     logURL(req);
-    2000;
     // always returns success with success and error operations
 
     const bulkOp = req.body.operation;

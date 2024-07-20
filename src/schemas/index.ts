@@ -35,3 +35,6 @@ export const TodoSchema = z.object({
     completedOn: z.number().nullish(),
     deletedOn: z.number().nullish(),
 });
+
+export type TTodoSchema = z.infer<typeof TodoSchema>;
+export type TLabelSchema = z.infer<typeof LabelSchema>;
