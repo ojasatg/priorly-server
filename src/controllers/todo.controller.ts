@@ -1,3 +1,4 @@
+import { TodoSchema } from "./../schemas/index";
 import type { Request, Response } from "express";
 import _ from "lodash";
 import { getCurrentTimeStamp, useSleep } from "#utils/datetime.utils";
@@ -198,28 +199,28 @@ async function allDeleted(req: Request, res: Response) {
 }
 
 async function create(req: Request, res: Response) {
-    logURL(req);
+    try {
+        logURL(req);
+        const reqTodo = req.body;
+        const createdTodo = await TodoModel.create(reqTodo);
 
-    const reqTodo = req.body;
-    const newTodo = {
-        ...reqTodo,
-        isDone: false,
-    };
+        const todo = TodoSchema.parse(createdTodo);
 
-    const todo = await TodoModel.create(newTodo);
-    console.log(todo);
-
-    todo.id = todo._id;
-
-    // TODOS.unshift(newTodo);
-
-    res.status(201).json({
-        rescode: EServerResponseRescodes.SUCCESS,
-        message: "Todo created succesfully",
-        data: {
-            todo: todo,
-        },
-    });
+        res.status(201).json({
+            rescode: EServerResponseRescodes.SUCCESS,
+            message: "Todo created succesfully",
+            data: {
+                todo: todo,
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            rescode: EServerResponseRescodes.ERROR,
+            message: "Cannot create todo",
+            error: "Internal Server Error",
+        });
+    }
 }
 
 async function details(req: Request, res: Response) {

@@ -12,31 +12,42 @@ LabelSchema.path("color").validate((val) => {
     return colorRegex.test(val);
 }, "Color must be a valid hexadecimal value");
 
+LabelSchema.virtual("id").get(function () {
+    return this._id.toHexString();
+});
+LabelSchema.set("toJSON", {
+    virtuals: true,
+});
+
 const TodoSchema = new Schema(
     {
         title: { type: String, required: [true, "Title is required"] },
-        description: { type: String, required: false },
-        deadline: { type: Number, required: false },
-        reminder: { type: Number, required: false },
-        completedAt: { type: Number, required: false },
-        deletedAt: { type: Number, required: false },
-        isPinned: { type: Boolean, required: false },
-        isDeleted: { type: Boolean, required: false },
-        isDone: { type: Boolean, required: false },
-        priority: { type: String, required: false, unique: false },
+        description: { type: String, required: false, default: "" },
+        deadline: { type: Number, required: false, default: null },
+        reminder: { type: Number, required: false, default: null },
+        completedOn: { type: Number, required: false, default: null },
+        deletedOn: { type: Number, required: false, default: null },
+        isPinned: { type: Boolean, required: false, default: false },
+        isDeleted: { type: Boolean, required: false, default: false },
+        isDone: { type: Boolean, required: false, default: false },
+        priority: { type: String, required: false, default: "A1" },
+        color: { type: String, required: false, default: "#FFFFFF" },
+        labels: [LabelSchema],
     },
     { timestamps: true },
 );
 
+// Custom validation
 TodoSchema.path("priority").validate((val) => {
     return priorityRegex.test(val);
 }, "Priority is not a valid format");
 
+TodoSchema.path("color").validate((val) => {
+    return colorRegex.test(val);
+}, "Color must be a valid hexadecimal value");
+
 // Add virtual fields
 TodoSchema.virtual("id").get(function () {
-    return this._id.toHexString();
-});
-LabelSchema.virtual("id").get(function () {
     return this._id.toHexString();
 });
 
@@ -49,9 +60,6 @@ TodoSchema.virtual("updatedOn").get(function () {
 
 // Ensure virtual fields are serialised.
 TodoSchema.set("toJSON", {
-    virtuals: true,
-});
-LabelSchema.set("toJSON", {
     virtuals: true,
 });
 
