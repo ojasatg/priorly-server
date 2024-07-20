@@ -1,10 +1,9 @@
-import { TodoSchema } from "./../schemas/index";
 import type { Request, Response } from "express";
 import _ from "lodash";
-import { getCurrentTimeStamp, useSleep } from "#utils/datetime.utils";
+import { TodoSchema } from "#schemas";
+import { getCurrentTimeStamp, logURL } from "#utils";
 import { EServerResponseCodes, ETodoBulkOperation, EServerResponseRescodes } from "#constants";
-import { logURL } from "#utils/logger.utils";
-import { bulkTodoOperation } from "../helpers/todo.helper";
+import { bulkTodoOperation, getSelector } from "#helpers";
 import { TodoModel } from "#models";
 
 let TODOS = [
@@ -155,52 +154,21 @@ let TODOS = [
     },
 ];
 
-async function all(req: Request, res: Response) {
+async function create(req: Request, res: Response) {
     logURL(req);
-    const filters = req.query;
-    let resTodos = _.filter(TODOS, { isDeleted: false });
+    const reqTodo = req.body;
 
-    const _filters = {
-        isDone: filters?.isDone === "true",
-        isPinned: filters?.isPinned === "true",
-        isDeleted: false,
-    };
-
-    if (!_.isEmpty(filters)) {
-        resTodos = _.filter(TODOS, _filters) as typeof TODOS;
+    if (_.isEmpty(reqTodo)) {
+        res.status(EServerResponseCodes.BAD_REQUEST).json({
+            rescode: EServerResponseRescodes.ERROR,
+            message: "Unable to create todo",
+            error: "Bad request: Sufficient data not available",
+        });
+        return;
     }
 
-    res.status(200).json({
-        rescode: EServerResponseRescodes.SUCCESS,
-        message: "Todos fetched successfully",
-        data: {
-            todos: resTodos,
-        },
-    });
-}
-
-async function allDeleted(req: Request, res: Response) {
-    logURL(req);
-
-    const resTodos = _.filter(TODOS, { isDeleted: true }) as typeof TODOS;
-
-    await useSleep(2000);
-
-    res.status(200).json({
-        rescode: EServerResponseRescodes.SUCCESS,
-        message: "Todos fetched successfully",
-        data: {
-            todos: resTodos,
-        },
-    });
-}
-
-async function create(req: Request, res: Response) {
     try {
-        logURL(req);
-        const reqTodo = req.body;
         const createdTodo = await TodoModel.create(reqTodo);
-
         const todo = TodoSchema.parse(createdTodo); // strips unnecessary keys
 
         res.status(EServerResponseCodes.CREATED).json({
@@ -221,23 +189,77 @@ async function create(req: Request, res: Response) {
 }
 
 async function details(req: Request, res: Response) {
+    const todoId = req.query.id;
+
+    if (!todoId) {
+        res.status(EServerResponseCodes.BAD_REQUEST).json({
+            rescode: EServerResponseRescodes.ERROR,
+            message: "Unable to create todo",
+            error: "Bad request: ID is required",
+        });
+        return;
+    }
+
     try {
-        const todoId = req.query.id;
         const foundTodo = await TodoModel.findById(todoId);
         const todo = TodoSchema.parse(foundTodo);
 
+        if (_.isEmpty(todo)) {
+            res.status(EServerResponseCodes.NOT_FOUND).json({
+                rescode: EServerResponseRescodes.ERROR,
+                message: "Unable to fetch the todo details",
+                error: "Requested item does not exist",
+            });
+        } else {
+            res.status(EServerResponseCodes.OK).json({
+                rescode: EServerResponseRescodes.SUCCESS,
+                message: "Todo details fetched successfully",
+                data: {
+                    todo: todo,
+                },
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(EServerResponseCodes.INTERNAL_SERVER_ERROR).json({
+            rescode: EServerResponseRescodes.ERROR,
+            message: "Unable fetch details",
+            error: "Internal Server Error",
+        });
+    }
+}
+
+async function all(req: Request, res: Response) {
+    logURL(req);
+
+    const filters = req.query as Record<string, string>;
+    if (_.isEmpty(filters)) {
+        // making sure that we automatically fetch not deleted todos when we don't pass any filter
+        filters["isDeleted"] = "false";
+    }
+
+    // building filter
+    const selector = getSelector(filters);
+
+    try {
+        const responseTodos = await TodoModel.find(selector);
+        const todos = _.map(responseTodos, (todo) => {
+            return TodoSchema.parse(todo);
+        });
+
         res.status(EServerResponseCodes.OK).json({
             rescode: EServerResponseRescodes.SUCCESS,
-            message: "Todo details fetched successfully",
+            message: "Todos fetched successfully",
             data: {
-                todo: todo,
+                todos: todos,
             },
         });
     } catch (error) {
-        res.status(EServerResponseCodes.NOT_FOUND).json({
+        console.error(error);
+        res.status(EServerResponseCodes.INTERNAL_SERVER_ERROR).json({
             rescode: EServerResponseRescodes.ERROR,
-            message: "Cannot fetch the todo details",
-            error: "Requested item does not exist",
+            message: "Unable to fetch todos",
+            error: "Internal Server Error",
         });
     }
 }
@@ -247,77 +269,61 @@ async function edit(req: Request, res: Response) {
     const changes = req.body.changes; // taking id in body, will require some extra work of processing the request.
 
     if (!todoId) {
-        res.status(400).json({
+        res.status(EServerResponseCodes.BAD_REQUEST).json({
             rescode: EServerResponseRescodes.ERROR,
-            message: "Bad request",
-            error: "Id required in query params",
+            message: "Unable to create todo",
+            error: "Bad request: ID is required",
+        });
+        return;
+    }
+    if (_.isEmpty(changes)) {
+        res.status(EServerResponseCodes.BAD_REQUEST).json({
+            rescode: EServerResponseRescodes.ERROR,
+            message: "Unable to create todo",
+            error: "Bad request: No changes sent to update",
         });
         return;
     }
 
-    const index = _.findIndex(TODOS, { id: todoId });
+    try {
+        // check for done and do other updates - not honouring whatever the pinned status sent or was, it will be set to false
+        // if the todo was deleted, the same API gets called
+        if (changes.isDone) {
+            changes["isPinned"] = false;
+            changes["reminder"] = null;
+            changes["deadline"] = null;
+            changes["completedOn"] = getCurrentTimeStamp();
 
-    if (index === -1) {
-        res.status(404).json({
+            // make sure remove the reminders from google calendar
+        }
+
+        const oldTodo = await TodoModel.findByIdAndUpdate(todoId, changes);
+
+        if (_.isEmpty(oldTodo)) {
+            res.status(EServerResponseCodes.NOT_FOUND).json({
+                rescode: EServerResponseRescodes.ERROR,
+                message: "Unable to delete the todo",
+                error: "Requested item does not exist",
+            });
+        } else {
+            const updatedTodo = await TodoModel.findById(todoId);
+            const todo = TodoSchema.parse(updatedTodo);
+            res.status(EServerResponseCodes.OK).json({
+                rescode: EServerResponseRescodes.SUCCESS,
+                message: "Todo updated successfully",
+                data: {
+                    todo: todo,
+                },
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(EServerResponseCodes.INTERNAL_SERVER_ERROR).json({
             rescode: EServerResponseRescodes.ERROR,
-            message: "Cannot update the todo",
-            error: "Requested item does not exist",
+            message: "Unable to update the todo details",
+            error: "Internal Server Error",
         });
-        return;
     }
-
-    const todoToBeChanged = TODOS[index];
-    const changedTodo = { ...todoToBeChanged, ...changes, updatedAt: getCurrentTimeStamp() };
-
-    if (changedTodo.isDone) {
-        // if todo is updated as done, we remove the reminder and deadline keys
-        if (changedTodo.reminder) {
-            delete changedTodo.reminder;
-        }
-        if (changedTodo.deadline) {
-            delete changedTodo.deadline;
-        }
-
-        changedTodo.completedAt = getCurrentTimeStamp();
-    } else if (!changedTodo.isDone) {
-        // if todo is updated as not done and has completedAt key, we delete it.
-        if (changedTodo.completedAt) {
-            delete changedTodo.completedAt;
-        }
-    }
-
-    TODOS.splice(index, 1, changedTodo);
-
-    res.status(200).json({
-        rescode: EServerResponseRescodes.SUCCESS,
-        message: "Todo updated successfully",
-        data: {
-            todo: changedTodo,
-        },
-    });
-}
-
-async function remove(req: Request, res: Response) {
-    logURL(req);
-    const todoId = req.query.id as string;
-
-    const todoToDelete = _.find(TODOS, { id: todoId });
-    if (_.isEmpty(todoToDelete)) {
-        res.status(404).json({
-            rescode: EServerResponseRescodes.ERROR,
-            message: "Cannot delete the todo",
-            error: "Requested item does not exist",
-        });
-        return;
-    }
-    _.remove(TODOS, { id: todoId });
-    res.status(200).json({
-        rescode: EServerResponseRescodes.SUCCESS,
-        message: "Todo deleted successfully",
-        data: {
-            id: todoId,
-        },
-    });
 }
 
 async function bulk(req: Request, res: Response) {
@@ -348,6 +354,46 @@ async function bulk(req: Request, res: Response) {
     });
 }
 
+async function remove(req: Request, res: Response) {
+    logURL(req);
+    const todoId = req.query.id as string;
+
+    if (!todoId) {
+        res.status(EServerResponseCodes.BAD_REQUEST).json({
+            rescode: EServerResponseRescodes.ERROR,
+            message: "Unable to create todo",
+            error: "Bad request: ID is required",
+        });
+        return;
+    }
+
+    try {
+        const todo = await TodoModel.findByIdAndDelete(todoId);
+        if (_.isEmpty(todo)) {
+            res.status(EServerResponseCodes.NOT_FOUND).json({
+                rescode: EServerResponseRescodes.ERROR,
+                message: "Unable to delete the todo",
+                error: "Requested item does not exist",
+            });
+        } else {
+            res.status(EServerResponseCodes.OK).json({
+                rescode: EServerResponseRescodes.SUCCESS,
+                message: "Todo deleted successfully",
+                data: {
+                    id: todoId,
+                },
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(EServerResponseCodes.INTERNAL_SERVER_ERROR).json({
+            rescode: EServerResponseRescodes.ERROR,
+            message: "Unable to delete the todo",
+            error: "Internal Server Error",
+        });
+    }
+}
+
 const TodoController = {
     all,
     create,
@@ -355,7 +401,6 @@ const TodoController = {
     details,
     edit,
     bulk,
-    allDeleted,
 };
 
 export default TodoController;

@@ -1,7 +1,7 @@
 import _ from "lodash";
 import type { TTodoBulkOperationResponseItem } from "#types";
 import { ETodoBulkOperation } from "#constants";
-import { getCurrentTimeStamp } from "#utils/datetime.utils";
+import { getCurrentTimeStamp } from "#utils";
 
 const TODO_OPERATION_MESSAGES = {
     [ETodoBulkOperation.PIN]: "Item pinned successfully",
@@ -109,4 +109,22 @@ export function bulkTodoOperation(todoIds: string[], todos: any[], operation: ET
 export function filterTodos(todos: any[], filters: { isDone: boolean; isPinned: boolean }) {
     const result = _.filter(todos, filters);
     return result;
+}
+
+export function getSelector(filters?: Record<string, string>) {
+    const selector: { isDone?: boolean; isPinned?: boolean; isDeleted?: boolean } = {};
+    if (_.isEmpty(filters)) {
+        return selector;
+    }
+
+    if (filters?.isDone === "true") {
+        selector.isDone = true;
+    }
+    if (filters?.isPinned === "true") {
+        selector.isPinned = true;
+    }
+    if (filters?.isDeleted === "true") {
+        selector.isDeleted = true;
+    }
+    return selector;
 }

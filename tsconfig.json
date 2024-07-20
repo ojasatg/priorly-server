@@ -7,6 +7,9 @@
             "#controllers": ["./src/controllers"],
             "#controllers/*": ["./src/controllers/*"],
 
+            "#helpers": ["./src/helpers"],
+            "#helpers/*": ["./src/helpers/*"],
+
             "#middlewares": ["./src/middlewares"],
             "#middlewares/*": ["./src/middlewares/*"],
 
