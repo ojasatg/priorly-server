@@ -63,5 +63,5 @@ TodoSchema.set("toJSON", {
     virtuals: true,
 });
 
-export const TodoModel = mongoose.model("TodoModel", TodoSchema);
-export const LabelModel = mongoose.model("LabelModel", LabelSchema);
+export const TodoModel = mongoose.model("Todos", TodoSchema);
+export const LabelModel = mongoose.model("Labels", LabelSchema);

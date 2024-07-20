@@ -2,8 +2,7 @@ import { TodoSchema } from "./../schemas/index";
 import type { Request, Response } from "express";
 import _ from "lodash";
 import { getCurrentTimeStamp, useSleep } from "#utils/datetime.utils";
-import { EServerResponseRescodes } from "#types/api.types";
-import { ETodoBulkOperation } from "#constants";
+import { EServerResponseCodes, ETodoBulkOperation, EServerResponseRescodes } from "#constants";
 import { logURL } from "#utils/logger.utils";
 import { bulkTodoOperation } from "../helpers/todo.helper";
 import { TodoModel } from "#models";
@@ -171,8 +170,6 @@ async function all(req: Request, res: Response) {
         resTodos = _.filter(TODOS, _filters) as typeof TODOS;
     }
 
-    await useSleep(2000);
-
     res.status(200).json({
         rescode: EServerResponseRescodes.SUCCESS,
         message: "Todos fetched successfully",
@@ -206,7 +203,7 @@ async function create(req: Request, res: Response) {
 
         const todo = TodoSchema.parse(createdTodo); // strips unnecessary keys
 
-        res.status(201).json({
+        res.status(EServerResponseCodes.CREATED).json({
             rescode: EServerResponseRescodes.SUCCESS,
             message: "Todo created succesfully",
             data: {
@@ -215,35 +212,34 @@ async function create(req: Request, res: Response) {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({
+        res.status(EServerResponseCodes.INTERNAL_SERVER_ERROR).json({
             rescode: EServerResponseRescodes.ERROR,
-            message: "Cannot create todo",
+            message: "Unable to add todo",
             error: "Internal Server Error",
         });
     }
 }
 
 async function details(req: Request, res: Response) {
-    2000;
-    const todoId = req.query.id;
-    const responseTodo = _.find(TODOS, { id: todoId });
+    try {
+        const todoId = req.query.id;
+        const foundTodo = await TodoModel.findById(todoId);
+        const todo = TodoSchema.parse(foundTodo);
 
-    if (_.isEmpty(responseTodo)) {
-        res.status(404).json({
+        res.status(EServerResponseCodes.OK).json({
+            rescode: EServerResponseRescodes.SUCCESS,
+            message: "Todo details fetched successfully",
+            data: {
+                todo: todo,
+            },
+        });
+    } catch (error) {
+        res.status(EServerResponseCodes.NOT_FOUND).json({
             rescode: EServerResponseRescodes.ERROR,
             message: "Cannot fetch the todo details",
             error: "Requested item does not exist",
         });
-        return;
     }
-
-    res.status(200).json({
-        rescode: EServerResponseRescodes.SUCCESS,
-        message: "Todo details fetched successfully",
-        data: {
-            todo: responseTodo,
-        },
-    });
 }
 
 async function edit(req: Request, res: Response) {
