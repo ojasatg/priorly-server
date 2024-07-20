@@ -5,6 +5,7 @@ import { EServerResponseRescodes } from "#types/api.types";
 import { ETodoBulkOperation } from "#constants";
 import { logURL } from "#utils/logger.utils";
 import { bulkTodoOperation } from "../helpers/todo.helper";
+import { TodoModel } from "#models";
 
 let TODOS = [
     {
@@ -202,18 +203,21 @@ async function create(req: Request, res: Response) {
     const reqTodo = req.body;
     const newTodo = {
         ...reqTodo,
-        id: "new",
         isDone: false,
-        createdAt: getCurrentTimeStamp(),
-        updatedAt: getCurrentTimeStamp(),
     };
-    TODOS.unshift(newTodo);
+
+    const todo = await TodoModel.create(newTodo);
+    console.log(todo);
+
+    todo.id = todo._id;
+
+    // TODOS.unshift(newTodo);
 
     res.status(201).json({
         rescode: EServerResponseRescodes.SUCCESS,
         message: "Todo created succesfully",
         data: {
-            todo: newTodo,
+            todo: todo,
         },
     });
 }

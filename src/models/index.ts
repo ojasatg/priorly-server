@@ -1,4 +1,4 @@
-import { Schema, Model } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const colorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
 const priorityRegex = /^[A-Z][1-9][0-9]?$|^A99$/;
@@ -25,12 +25,35 @@ const TodoSchema = new Schema(
         isDone: { type: Boolean, required: false },
         priority: { type: String, required: false, unique: false },
     },
-    { timestamps: { currentTime: () => new Date().getTime() / 1000 } },
+    { timestamps: true },
 );
 
 TodoSchema.path("priority").validate((val) => {
     return priorityRegex.test(val);
 }, "Priority is not a valid format");
 
-export const TodoModel = new Model(TodoSchema);
-export const LabelModel = new Model(LabelSchema);
+// Add virtual fields
+TodoSchema.virtual("id").get(function () {
+    return this._id.toHexString();
+});
+LabelSchema.virtual("id").get(function () {
+    return this._id.toHexString();
+});
+
+TodoSchema.virtual("createdOn").get(function () {
+    return new Date(this.createdAt).getTime() / 1000;
+});
+TodoSchema.virtual("updatedOn").get(function () {
+    return new Date(this.updatedAt).getTime() / 1000;
+});
+
+// Ensure virtual fields are serialised.
+TodoSchema.set("toJSON", {
+    virtuals: true,
+});
+LabelSchema.set("toJSON", {
+    virtuals: true,
+});
+
+export const TodoModel = mongoose.model("TodoModel", TodoSchema);
+export const LabelModel = mongoose.model("LabelModel", LabelSchema);
