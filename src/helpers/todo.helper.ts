@@ -68,7 +68,7 @@ function bulkToggle(todoIds: string[], todos: any[], operation: ETodoBulkOperati
                 if (todo.deadline) {
                     delete todo.deadline;
                 }
-                todo.completedOn = getCurrentTimeStamp();
+                todo.completedAt = getCurrentTimeStamp();
             }
 
             successData.push({

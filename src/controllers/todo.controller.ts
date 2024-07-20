@@ -13,8 +13,8 @@ let TODOS = [
         description:
             "Draft proposal outlining research objectives, methodology, and expected outcomes.",
         isDone: false,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
         deadline: 1648828800,
         reminder: 1648776000,
         isPinned: true,
@@ -24,8 +24,8 @@ let TODOS = [
         id: "5f6g7h8i",
         title: "Review code for performance improvements",
         isDone: false,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
         deadline: 1858915200,
         reminder: 1648828800,
         isPinned: false,
@@ -35,8 +35,8 @@ let TODOS = [
         id: "9j0k1l2m",
         title: "Attend project kickoff meeting",
         isDone: false,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
         deadline: 1858996800,
         reminder: 1648915200,
         isPinned: true,
@@ -48,8 +48,8 @@ let TODOS = [
         description:
             "Ensure all project documentation is up to date with recent changes and additions.",
         isDone: false,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
         deadline: 1649083200,
         reminder: 1648996800,
         isPinned: false,
@@ -59,8 +59,8 @@ let TODOS = [
         id: "7l8m9n0o",
         title: "Organize team retrospective",
         isDone: false,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
         deadline: 1649164800,
         reminder: 1649083200,
         isPinned: false,
@@ -72,8 +72,8 @@ let TODOS = [
         description:
             "Explore and evaluate potential new software tools to streamline project workflows and enhance productivity.",
         isDone: false,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
         deadline: 1649246400,
         reminder: 1649164800,
         isPinned: false,
@@ -85,8 +85,8 @@ let TODOS = [
         description:
             "Schedule and conduct user testing sessions to gather feedback on product usability.",
         isDone: false,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
         deadline: 1649328000,
         reminder: 1649246400,
         isPinned: true,
@@ -98,8 +98,8 @@ let TODOS = [
         description:
             "Develop unit tests to ensure the stability and functionality of newly implemented features.",
         isDone: false,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
         deadline: 1649414400,
         reminder: 1649328000,
         isPinned: false,
@@ -111,8 +111,8 @@ let TODOS = [
         description:
             "Create a compelling presentation to showcase project progress and upcoming milestones to the client.",
         isDone: false,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
         deadline: 1649500800,
         reminder: 1649414400,
         isPinned: false,
@@ -124,9 +124,9 @@ let TODOS = [
         description:
             "Push latest changes to staging environment for final testing before production deployment.",
         isDone: true,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
-        completedOn: 1649328000,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
+        completedAt: 1649328000,
         isPinned: false,
         isDeleted: false,
     },
@@ -134,9 +134,9 @@ let TODOS = [
         id: "1j2k3l4m",
         title: "Finalize budget report for Q3",
         isDone: true,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
-        completedOn: 1649414400,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
+        completedAt: 1649414400,
         isPinned: false,
         isDeleted: false,
     },
@@ -146,9 +146,9 @@ let TODOS = [
         description:
             "Schedule and conduct individual performance reviews with each team member to provide feedback and set goals.",
         isDone: true,
-        createdOn: 1648656000,
-        updatedOn: 1648657200,
-        completedOn: 1649500800,
+        createdAt: 1648656000,
+        updatedAt: 1648657200,
+        completedAt: 1649500800,
         isPinned: false,
         isDeleted: false,
     },
@@ -198,15 +198,14 @@ async function allDeleted(req: Request, res: Response) {
 
 async function create(req: Request, res: Response) {
     logURL(req);
-    2000;
 
     const reqTodo = req.body;
     const newTodo = {
         ...reqTodo,
         id: "new",
         isDone: false,
-        createdOn: getCurrentTimeStamp(),
-        updatedOn: getCurrentTimeStamp(),
+        createdAt: getCurrentTimeStamp(),
+        updatedAt: getCurrentTimeStamp(),
     };
     TODOS.unshift(newTodo);
 
@@ -267,7 +266,7 @@ async function edit(req: Request, res: Response) {
     }
 
     const todoToBeChanged = TODOS[index];
-    const changedTodo = { ...todoToBeChanged, ...changes, updatedOn: getCurrentTimeStamp() };
+    const changedTodo = { ...todoToBeChanged, ...changes, updatedAt: getCurrentTimeStamp() };
 
     if (changedTodo.isDone) {
         // if todo is updated as done, we remove the reminder and deadline keys
@@ -278,11 +277,11 @@ async function edit(req: Request, res: Response) {
             delete changedTodo.deadline;
         }
 
-        changedTodo.completedOn = getCurrentTimeStamp();
+        changedTodo.completedAt = getCurrentTimeStamp();
     } else if (!changedTodo.isDone) {
-        // if todo is updated as not done and has completedOn key, we delete it.
-        if (changedTodo.completedOn) {
-            delete changedTodo.completedOn;
+        // if todo is updated as not done and has completedAt key, we delete it.
+        if (changedTodo.completedAt) {
+            delete changedTodo.completedAt;
         }
     }
 
