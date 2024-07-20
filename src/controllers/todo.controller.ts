@@ -243,9 +243,17 @@ async function details(req: Request, res: Response) {
 }
 
 async function edit(req: Request, res: Response) {
-    2000;
     const todoId = req.query.id as string; // taking id in query
     const changes = req.body.changes; // taking id in body, will require some extra work of processing the request.
+
+    if (!todoId) {
+        res.status(400).json({
+            rescode: EServerResponseRescodes.ERROR,
+            message: "Bad request",
+            error: "Id required in query params",
+        });
+        return;
+    }
 
     const index = _.findIndex(TODOS, { id: todoId });
 
