@@ -4,6 +4,7 @@ export enum ETodoBulkOperation {
     DELETE,
     NOT_DONE,
     UNPIN,
+    RECOVER,
 }
 
 export enum ETodoType {

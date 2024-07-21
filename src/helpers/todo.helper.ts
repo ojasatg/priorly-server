@@ -1,114 +1,83 @@
 import _ from "lodash";
-import type { TTodoBulkOperationResponseItem } from "#types";
+import mongoose from "mongoose";
 import { ETodoBulkOperation } from "#constants";
 import { getCurrentTimeStamp } from "#utils";
+import { TodoModel } from "#models";
 
-const TODO_OPERATION_MESSAGES = {
-    [ETodoBulkOperation.PIN]: "Item pinned successfully",
-    [ETodoBulkOperation.UNPIN]: "Item unpinned successfully",
-    [ETodoBulkOperation.DONE]: "Item marked as done successfully",
-    [ETodoBulkOperation.NOT_DONE]: "Item marked as not done successfully",
-    error: "Item not found",
-};
+export async function bulkOperation(todoIds: string[], operation: ETodoBulkOperation) {
+    const objectIds = _.map(todoIds, (id) => new mongoose.Types.ObjectId(id));
 
-function bulkDelete(todoIds: string[], todos: any[]) {
-    const errorData: TTodoBulkOperationResponseItem[] = [];
-    const successData: TTodoBulkOperationResponseItem[] = [];
+    switch (operation) {
+        // if pin or unpin operation is happening, it means todo is not done or not deleted.
+        case ETodoBulkOperation.PIN:
+            await TodoModel.updateMany(
+                { _id: { $in: objectIds } },
+                { $set: { isPinned: true, isDone: false, isDeleted: false } },
+            );
+            break;
+        case ETodoBulkOperation.UNPIN:
+            await TodoModel.updateMany(
+                { _id: { $in: objectIds } },
+                { $set: { isPinned: false, isDone: false, isDeleted: false } },
+            );
+            break;
 
-    _.forEach(todoIds, (todoId) => {
-        const found = _.findIndex(todos, { id: todoId });
-        if (found !== -1) {
-            todos.splice(found, 1);
-            successData.push({
-                id: todoId,
-                message: "Item removed successfully",
-            });
-        } else {
-            errorData.push({
-                id: todoId,
-                message: "Item does not exist",
-            });
-        }
-    });
+        // if done/not done operation is happening, means we need to reset some values
+        case ETodoBulkOperation.DONE:
+            await TodoModel.updateMany(
+                { _id: { $in: objectIds } },
+                {
+                    $set: {
+                        isDone: true,
+                        isPinned: false,
+                        reminder: null,
+                        deadline: null,
+                        completedOn: getCurrentTimeStamp(),
+                    },
+                },
+            );
+            break;
+        case ETodoBulkOperation.NOT_DONE:
+            await TodoModel.updateMany(
+                { _id: { $in: objectIds } },
+                {
+                    $set: {
+                        isDone: false,
+                        isPinned: false,
+                        reminder: null,
+                        deadline: null,
+                    },
+                },
+            );
+            break;
 
-    return {
-        successData,
-        errorData,
-        todos,
-    };
-}
+        // if delete operation is happening then we are resetting the pin status
+        case ETodoBulkOperation.DELETE:
+            await TodoModel.updateMany(
+                { _id: { $in: objectIds } },
+                {
+                    $set: {
+                        isDeleted: true,
+                        isPinned: false,
+                        deletedOn: getCurrentTimeStamp(),
+                    },
+                },
+            );
+            break;
 
-function bulkToggle(todoIds: string[], todos: any[], operation: ETodoBulkOperation) {
-    const errorData: TTodoBulkOperationResponseItem[] = [];
-    const successData: TTodoBulkOperationResponseItem[] = [];
-
-    if (operation === ETodoBulkOperation.DELETE) {
-        // nothing for delete operation
-        return { todos, successData, errorData };
+        case ETodoBulkOperation.RECOVER:
+            await TodoModel.updateMany(
+                { _id: { $in: objectIds } },
+                {
+                    $set: {
+                        isDeleted: false,
+                        isPinned: false,
+                        deletedOn: null,
+                    },
+                },
+            );
+            break;
     }
-    // we get the field that we want to modify
-    const fieldToBeOperated =
-        operation === ETodoBulkOperation.PIN || operation === ETodoBulkOperation.UNPIN
-            ? "isPinned"
-            : "isDone";
-    // we set the value to be set as true when the operation is pin or done otherwise it is false
-    const valueToBeSet =
-        operation === ETodoBulkOperation.PIN || operation === ETodoBulkOperation.DONE;
-
-    _.forEach(todoIds, (todoId) => {
-        const found = _.findIndex(todos, { id: todoId });
-        if (found !== -1) {
-            todos[found][fieldToBeOperated] = valueToBeSet;
-
-            const todo = todos[found];
-            if (todo.isDone && operation === ETodoBulkOperation.DONE) {
-                if (todo.reminder) {
-                    delete todo.reminder;
-                }
-                if (todo.deadline) {
-                    delete todo.deadline;
-                }
-                todo.completedAt = getCurrentTimeStamp();
-            }
-
-            successData.push({
-                id: todoId,
-                message: TODO_OPERATION_MESSAGES[operation],
-            });
-        } else {
-            errorData.push({
-                id: todoId,
-                message: TODO_OPERATION_MESSAGES.error,
-            });
-        }
-    });
-
-    return { todos, successData, errorData };
-}
-
-export function bulkTodoOperation(todoIds: string[], todos: any[], operation: ETodoBulkOperation) {
-    let successData: TTodoBulkOperationResponseItem[] = [];
-    let errorData: TTodoBulkOperationResponseItem[] = [];
-    let operationResult;
-
-    const allTodos = _.cloneDeep(todos);
-
-    if (operation === ETodoBulkOperation.DELETE) {
-        operationResult = bulkDelete(todoIds, allTodos);
-    } else {
-        operationResult = bulkToggle(todoIds, allTodos, operation);
-    }
-
-    successData = operationResult?.successData ?? [];
-    errorData = operationResult?.errorData ?? [];
-    todos = operationResult?.todos ?? [];
-
-    return { successData, errorData, todos };
-}
-
-export function filterTodos(todos: any[], filters: { isDone: boolean; isPinned: boolean }) {
-    const result = _.filter(todos, filters);
-    return result;
 }
 
 export function getSelector(filters?: Record<string, string>) {
@@ -119,9 +88,11 @@ export function getSelector(filters?: Record<string, string>) {
 
     if (filters?.isDone === "true") {
         selector.isDone = true;
+        selector.isDeleted = false;
     }
     if (filters?.isPinned === "true") {
         selector.isPinned = true;
+        selector.isDeleted = false;
     }
     if (filters?.isDeleted === "true") {
         selector.isDeleted = true;
