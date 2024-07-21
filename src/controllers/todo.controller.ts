@@ -264,6 +264,38 @@ async function all(req: Request, res: Response) {
     }
 }
 
+async function count(req: Request, res: Response) {
+    logURL(req);
+
+    const filters = req.query as Record<string, string>;
+    if (_.isEmpty(filters)) {
+        // making sure that we automatically fetch not deleted todos when we don't pass any filter
+        filters["isDeleted"] = "false";
+    }
+
+    // building filter
+    const selector = getSelector(filters);
+
+    try {
+        const count = await TodoModel.countDocuments(selector);
+
+        res.status(EServerResponseCodes.OK).json({
+            rescode: EServerResponseRescodes.SUCCESS,
+            message: "Todos fetched successfully",
+            data: {
+                count: count,
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(EServerResponseCodes.INTERNAL_SERVER_ERROR).json({
+            rescode: EServerResponseRescodes.ERROR,
+            message: "Unable to fetch todos",
+            error: "Internal Server Error",
+        });
+    }
+}
+
 async function edit(req: Request, res: Response) {
     const todoId = req.query.id as string; // taking id in query
     const changes = req.body.changes; // taking id in body, will require some extra work of processing the request.
@@ -438,6 +470,7 @@ async function remove(req: Request, res: Response) {
 
 const TodoController = {
     all,
+    count,
     create,
     remove,
     details,

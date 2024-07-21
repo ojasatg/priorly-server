@@ -19,6 +19,10 @@ LabelSchema.set("toJSON", {
     virtuals: true,
 });
 
+const UserSchema = new Schema({
+    email: { type: String, required: [true, "Email is required"] },
+});
+
 const TodoSchema = new Schema(
     {
         title: { type: String, required: [true, "Title is required"] },
@@ -32,7 +36,8 @@ const TodoSchema = new Schema(
         isDone: { type: Boolean, required: false, default: false },
         priority: { type: String, required: false, default: "A1" },
         color: { type: String, required: false, default: "#FFFFFF" },
-        labels: [LabelSchema],
+        labels: [LabelSchema], // labels are not stored as foreign keys
+        // user: { type: Schema.Types.ObjectId, ref: "Users", required: true },
     },
     { timestamps: true },
 );
@@ -65,3 +70,4 @@ TodoSchema.set("toJSON", {
 
 export const TodoModel = mongoose.model("Todos", TodoSchema);
 export const LabelModel = mongoose.model("Labels", LabelSchema);
+export const UserModel = mongoose.model("Users", UserSchema);

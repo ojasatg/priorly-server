@@ -96,6 +96,9 @@ export function getSelector(filters?: Record<string, string>) {
     }
     if (filters?.isDeleted === "true") {
         selector.isDeleted = true;
+    } else {
+        selector.isDeleted = false;
     }
+
     return selector;
 }
