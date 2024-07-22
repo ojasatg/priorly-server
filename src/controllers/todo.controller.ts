@@ -2,7 +2,12 @@ import type { Request, Response } from "express";
 import _ from "lodash";
 import { TodoBulkOperationRequestSchema, TodoChangesSchema, TodoSchema } from "#schemas";
 import { getCurrentTimeStamp, logURL } from "#utils";
-import { EServerResponseCodes, EServerResponseRescodes } from "#constants";
+import {
+    EServerResponseCodes,
+    EServerResponseRescodes,
+    ETodoBulkOperation,
+    TODO_BULK_OPERATION_MESSAGES,
+} from "#constants";
 import { bulkOperation, getSelector } from "#helpers";
 import { TodoModel } from "#models";
 
@@ -238,11 +243,14 @@ async function all(req: Request, res: Response) {
         filters["isDeleted"] = "false";
     }
 
+    const cursor = Number(req.query.cursor) || 0;
+    const limit = Number(req.query.limit) || 10;
+
     // building filter
     const selector = getSelector(filters);
 
     try {
-        const responseTodos = await TodoModel.find(selector);
+        const responseTodos = await TodoModel.find(selector, null, { skip: cursor, limit }); // pagination logic with skip and limit
         const todos = _.map(responseTodos, (todo) => {
             return TodoSchema.parse(todo);
         });
@@ -252,6 +260,7 @@ async function all(req: Request, res: Response) {
             message: "Todos fetched successfully",
             data: {
                 todos: todos,
+                cursor: todos.length || -1,
             },
         });
     } catch (error) {
@@ -401,7 +410,7 @@ async function bulk(req: Request, res: Response) {
     } catch (error) {
         res.status(EServerResponseCodes.BAD_REQUEST).json({
             rescode: EServerResponseRescodes.ERROR,
-            message: "Unable to perform operations",
+            message: "Bad request: Please try again later",
             error: "Invalid operation or invalid properties",
         });
         return;
@@ -422,7 +431,7 @@ async function bulk(req: Request, res: Response) {
         console.error(error);
         res.status(EServerResponseCodes.INTERNAL_SERVER_ERROR).json({
             rescode: EServerResponseRescodes.ERROR,
-            message: "Unable to perform the bulk operation",
+            message: TODO_BULK_OPERATION_MESSAGES[bulkOp as ETodoBulkOperation],
             error: "Internal Server Error",
         });
     }

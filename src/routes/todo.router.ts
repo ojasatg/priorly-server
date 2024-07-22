@@ -9,7 +9,7 @@ router.get("/all", TodoController.all);
 router.get("/count", TodoController.count);
 router.get("/details", TodoController.details);
 router.put("/edit", TodoController.edit);
-router.put("/bulk/", TodoController.bulk);
+router.put("/bulk", TodoController.bulk);
 router.delete("/remove", TodoController.remove);
 
 export default router;
