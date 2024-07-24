@@ -11,154 +11,6 @@ import {
 import { bulkOperation, getSelector } from "#helpers";
 import { TodoModel } from "#models";
 
-// let TODOS = [
-//     {
-//         id: "1a2b3c4d",
-//         title: "Prepare research proposal",
-//         description:
-//             "Draft proposal outlining research objectives, methodology, and expected outcomes.",
-//         isDone: false,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         deadline: 1648828800,
-//         reminder: 1648776000,
-//         isPinned: true,
-//         isDeleted: false,
-//     },
-//     {
-//         id: "5f6g7h8i",
-//         title: "Review code for performance improvements",
-//         isDone: false,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         deadline: 1858915200,
-//         reminder: 1648828800,
-//         isPinned: false,
-//         isDeleted: false,
-//     },
-//     {
-//         id: "9j0k1l2m",
-//         title: "Attend project kickoff meeting",
-//         isDone: false,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         deadline: 1858996800,
-//         reminder: 1648915200,
-//         isPinned: true,
-//         isDeleted: false,
-//     },
-//     {
-//         id: "3h4i5j6k",
-//         title: "Update project documentation",
-//         description:
-//             "Ensure all project documentation is up to date with recent changes and additions.",
-//         isDone: false,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         deadline: 1649083200,
-//         reminder: 1648996800,
-//         isPinned: false,
-//         isDeleted: false,
-//     },
-//     {
-//         id: "7l8m9n0o",
-//         title: "Organize team retrospective",
-//         isDone: false,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         deadline: 1649164800,
-//         reminder: 1649083200,
-//         isPinned: false,
-//         isDeleted: false,
-//     },
-//     {
-//         id: "1p2q3r4s",
-//         title: "Research new software tools",
-//         description:
-//             "Explore and evaluate potential new software tools to streamline project workflows and enhance productivity.",
-//         isDone: false,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         deadline: 1649246400,
-//         reminder: 1649164800,
-//         isPinned: false,
-//         isDeleted: false,
-//     },
-//     {
-//         id: "5t6u7v8w",
-//         title: "Conduct user testing sessions",
-//         description:
-//             "Schedule and conduct user testing sessions to gather feedback on product usability.",
-//         isDone: false,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         deadline: 1649328000,
-//         reminder: 1649246400,
-//         isPinned: true,
-//         isDeleted: false,
-//     },
-//     {
-//         id: "9x0y1z2a",
-//         title: "Write unit tests for new features",
-//         description:
-//             "Develop unit tests to ensure the stability and functionality of newly implemented features.",
-//         isDone: false,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         deadline: 1649414400,
-//         reminder: 1649328000,
-//         isPinned: false,
-//         isDeleted: false,
-//     },
-//     {
-//         id: "3b4c5d6e",
-//         title: "Prepare presentation for client demo",
-//         description:
-//             "Create a compelling presentation to showcase project progress and upcoming milestones to the client.",
-//         isDone: false,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         deadline: 1649500800,
-//         reminder: 1649414400,
-//         isPinned: false,
-//         isDeleted: false,
-//     },
-//     {
-//         id: "7f8g9h0i",
-//         title: "Deploy latest version to staging server",
-//         description:
-//             "Push latest changes to staging environment for final testing before production deployment.",
-//         isDone: true,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         completedAt: 1649328000,
-//         isPinned: false,
-//         isDeleted: false,
-//     },
-//     {
-//         id: "1j2k3l4m",
-//         title: "Finalize budget report for Q3",
-//         isDone: true,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         completedAt: 1649414400,
-//         isPinned: false,
-//         isDeleted: false,
-//     },
-//     {
-//         id: "5n6o7p8q",
-//         title: "Conduct performance reviews with team members",
-//         description:
-//             "Schedule and conduct individual performance reviews with each team member to provide feedback and set goals.",
-//         isDone: true,
-//         createdAt: 1648656000,
-//         updatedAt: 1648657200,
-//         completedAt: 1649500800,
-//         isPinned: false,
-//         isDeleted: false,
-//     },
-// ];
-
 async function create(req: Request, res: Response) {
     logURL(req);
     const reqTodo = req.body;
@@ -309,6 +161,12 @@ async function edit(req: Request, res: Response) {
     const todoId = req.query.id as string; // taking id in query
     const changes = req.body.changes; // taking id in body, will require some extra work of processing the request.
 
+    // res.status(500).json({
+    //     error: "Custom error",
+    //     message: "This is expected error",
+    // });
+    // return;
+
     if (!todoId) {
         res.status(EServerResponseCodes.BAD_REQUEST).json({
             rescode: EServerResponseRescodes.ERROR,
@@ -366,6 +224,7 @@ async function edit(req: Request, res: Response) {
             changes["deletedOn"] = getCurrentTimeStamp();
         } else {
             changes["deletedOn"] = null;
+            changes["isDeleted"] = false;
         }
 
         const updatedTodo = await TodoModel.findByIdAndUpdate(
